@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Dette Technique — {{PROJECT_NAME}}</title>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --green: #22c55e;
+            --yellow: #eab308;
+            --orange: #f97316;
+            --red: #ef4444;
+            --blue: #3b82f6;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-secondary);
+            padding: 2rem;
+            line-height: 1.6;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .header .meta {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        /* Gauge */
+        .gauge-container {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .gauge-value {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .gauge-label {
+            font-size: 1.3rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .gauge-sublabel {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Bars */
+        .bar-item {
+            display: flex;
+            align-items: center;
+            margin: 0.6rem 0;
+        }
+
+        .bar-label {
+            width: 130px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .bar-bg {
+            flex: 1;
+            height: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.8s ease-out;
+        }
+
+        .bar-value {
+            width: 50px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .metric-box {
+            text-align: center;
+            padding: 1rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            border-bottom: 2px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        th:hover {
+            color: var(--text-primary);
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--bg-primary);
+            font-size: 0.9rem;
+        }
+
+        tr:hover {
+            background: rgba(255,255,255,0.03);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-critical { background: #7f1d1d; color: #fca5a5; }
+        .badge-high { background: #78350f; color: #fcd34d; }
+        .badge-moderate { background: #1e3a5f; color: #93c5fd; }
+        .badge-low { background: #1c3829; color: #86efac; }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: var(--bg-tertiary);
+            border-color: var(--blue);
+        }
+
+        /* Radar Chart placeholder */
+        .radar-placeholder {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            color: #475569;
+            font-size: 0.8rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .gauge-value { font-size: 3.5rem; }
+            .metrics-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Dashboard dette technique</h1>
+        <div class="meta">{{PROJECT_NAME}} | Genere le {{DATE}} | {{FILE_COUNT}} fichiers | {{LOC}} LOC</div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Health Score Gauge -->
+        <div class="card">
+            <h2>Health Score</h2>
+            <div class="gauge-container">
+                <div class="gauge-value" id="health-score" style="color: {{SCORE_COLOR}}">{{HEALTH_SCORE}}</div>
+                <div class="gauge-label">{{INTERPRETATION}}</div>
+                <div class="gauge-sublabel">{{DESCRIPTION}}</div>
+            </div>
+        </div>
+
+        <!-- Category Scores -->
+        <div class="card">
+            <h2>Scores par categorie</h2>
+            <div id="category-bars">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="card">
+            <h2>Metriques cles</h2>
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-cc">{{AVG_CC}}</div>
+                    <div class="metric-label">CC Moyenne</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-dup">{{DUPLICATION}}%</div>
+                    <div class="metric-label">Duplication</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-ratio">{{TEST_RATIO}}</div>
+                    <div class="metric-label">Ratio Tests</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-markers">{{MARKERS_KLOC}}</div>
+                    <div class="metric-label">Marqueurs/KLOC</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="card">
+            <h2>Resume du projet</h2>
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-value" style="color: var(--text-primary)">{{SOURCE_FILES}}</div>
+                    <div class="metric-label">Fichiers source</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" style="color: var(--text-primary)">{{TEST_FILES}}</div>
+                    <div class="metric-label">Fichiers de tests</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" style="color: var(--text-primary)">{{TOTAL_ISSUES}}</div>
+                    <div class="metric-label">Issues total</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" style="color: var(--red)">{{CRITICAL_ISSUES}}</div>
+                    <div class="metric-label">Issues critiques</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issues Table -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h2>Liste des issues</h2>
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterIssues('all', this)">Toutes</button>
+            <button class="filter-btn" onclick="filterIssues('critical', this)">Critiques</button>
+            <button class="filter-btn" onclick="filterIssues('high', this)">Elevees</button>
+            <button class="filter-btn" onclick="filterIssues('moderate', this)">Moderees</button>
+            <button class="filter-btn" onclick="filterIssues('low', this)">Faibles</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortIssues('severity')">Severite</th>
+                        <th onclick="sortIssues('file')">Fichier</th>
+                        <th onclick="sortIssues('type')">Type</th>
+                        <th onclick="sortIssues('detail')">Detail</th>
+                    </tr>
+                </thead>
+                <tbody id="issues-tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <footer>
+        Rapport genere par tech-debt-manager | {{DATE}}
+    </footer>
+
+    <script>
+        // ===== DATA (injected by generate_report.py) =====
+        const issues = {{ISSUES_JSON}};
+        const categoryScores = {{CATEGORY_SCORES_JSON}};
+
+        // ===== CATEGORY BARS =====
+        const barsContainer = document.getElementById('category-bars');
+        Object.entries(categoryScores).forEach(([cat, score]) => {
+            const color = score >= 60 ? 'var(--green)' : score >= 40 ? 'var(--yellow)' : 'var(--red)';
+            const div = document.createElement('div');
+            div.className = 'bar-item';
+            div.innerHTML = `
+                <span class="bar-label">${cat}</span>
+                <div class="bar-bg"><div class="bar-fill" style="width:${score}%;background:${color}"></div></div>
+                <span class="bar-value" style="color:${color}">${score}</span>
+            `;
+            barsContainer.appendChild(div);
+        });
+
+        // ===== ISSUES TABLE =====
+        let currentFilter = 'all';
+        let sortKey = 'severity';
+        let sortDir = 1;
+
+        const severityOrder = {critical: 0, high: 1, moderate: 2, low: 3};
+
+        function renderIssues() {
+            const tbody = document.getElementById('issues-tbody');
+            let filtered = currentFilter === 'all' ? [...issues] : issues.filter(i => i.severity === currentFilter);
+
+            filtered.sort((a, b) => {
+                if (sortKey === 'severity') {
+                    return ((severityOrder[a.severity] || 99) - (severityOrder[b.severity] || 99)) * sortDir;
+                }
+                return (a[sortKey] || '').localeCompare(b[sortKey] || '') * sortDir;
+            });
+
+            tbody.innerHTML = filtered.map(i => `
+                <tr>
+                    <td><span class="badge badge-${i.severity}">${i.severity}</span></td>
+                    <td><code>${i.file}</code></td>
+                    <td>${i.type}</td>
+                    <td>${i.detail}</td>
+                </tr>
+            `).join('');
+        }
+
+        function filterIssues(severity, btn) {
+            currentFilter = severity;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderIssues();
+        }
+
+        function sortIssues(key) {
+            if (sortKey === key) {
+                sortDir *= -1;
+            } else {
+                sortKey = key;
+                sortDir = 1;
+            }
+            renderIssues();
+        }
+
+        renderIssues();
+    </script>
+</body>
+</html>
