@@ -70,6 +70,14 @@ Contributions are welcome. To propose an improvement:
 2. Suggest a solution with a usage example.
 3. Add tests or validation cases when possible.
 
+### Global install (`npx skills`)
+
+To add this skill globally from this repository, run:
+
+```bash
+npx skills add Ludovic33Fr/tech-debt-manager@tech-debt-manager -g -y
+```
+
 ---
 
 ## Français
@@ -137,3 +145,11 @@ Les contributions sont les bienvenues. Pour proposer une amélioration :
 1. Ouvrez une issue avec le problème ou l’idée.
 2. Proposez une solution avec un exemple d’utilisation.
 3. Ajoutez, si possible, des tests ou des cas de validation.
+
+### Installation globale (`npx skills`)
+
+Pour ajouter ce skill globalement depuis ce repository, exécutez :
+
+```bash
+npx skills add Ludovic33Fr/tech-debt-manager@tech-debt-manager -g -y
+```
